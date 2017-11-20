@@ -128,6 +128,8 @@ The sensors are fully autonomous and always report to the cloud, no need to conn
 
 >Sensors are always online and are using **LoRa** network to broadcast measured values.
 
+![sensor blueprint](https://res.cloudinary.com/stora-enso-oyj/image/upload/v1511207624/ers_6_1_yradhb.png)
+
 ## API Sandbox
 
 The sensors report every 15 minutes. Stora Enso provides **GraphQL API** to fetch the data.
