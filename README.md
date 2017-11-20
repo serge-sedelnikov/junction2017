@@ -12,6 +12,8 @@ Hi! This is the explanation of what devices we have at the Junction. The protoco
     - [JavaScript example over WebSockets](#javascript-example-over-websocket)
 2. [NFC Tags](#nfc-tags)
 3. [Air Quality](#air-quality)
+    - [API Sandbox](#api-sandbox)
+    - [API Query](#api-query)
 
 # Industrial RFID Reader (Impinj)
 
@@ -126,7 +128,7 @@ The sensors are fully autonomous and always report to the cloud, no need to conn
 
 >Sensors are always online and are using **LoRa** network to broadcast measured values.
 
-## API to Fetch the Air Quality
+## API Sandbox
 
 The sensors report every 15 minutes. Stora Enso provides **GraphQL API** to fetch the data.
 
@@ -136,12 +138,6 @@ We provide you a sendbox where you can compose and test API queries
 https://woodcityapiqa.azurewebsites.net/graphiql/index.html
 ``` 
 Navigate there, build up query, test result data and use it in your application and API.
-
-See the example react application in `airquality` folder. To run it execute
-
-```
-npm start
-```
 
 With the API you can query all or any of the above air wuality metrics:
 
@@ -154,3 +150,41 @@ With the API you can query all or any of the above air wuality metrics:
 Also for building you can query sensors, floors and rooms.
 
 > Use `Ctrl+Space` in the sandbox to get available composition values and `Play` button to test the query.
+
+![GraphiQL Sandbox](https://res.cloudinary.com/stora-enso-oyj/image/upload/v1511205661/graphiql_limiw6.png)
+
+## API Query
+
+See the example react application in `airquality` folder. To run it execute
+
+```
+npm start
+```
+
+When you are happy with the query and the result at the sandbox, you can make an API call to the API endpoint to get this data as JSON for your application.
+
+API endpoint to use is:
+
+```
+https://woodcityapiqa.azurewebsites.net/api/v1/GraphQL
+```
+
+Make a `POST` request to this endpoint with the following body:
+
+```
+curl -X POST \
+--header 'Content-Type: application/json' \
+-d '{ "query" : "{ building(id:\"Junction2017\") { airquality { co2, timestamp }}}" \ 
+ }' \
+'http://woodcityapiqa.azurewebsites.net/api/v1/GraphQL'
+```
+
+Notice `-d` data field is JSON object having one key `"query"` and the value is the composed in the sandbox query as string. Notice quotas marked with `\"` in the building ID.
+
+```
+{
+    "query": "{ building(id:\"Junction2017\") { airquality { co2, timestamp }}}"
+}
+```
+
+Once the query is executed, the result JSON will contain in this case air quality for overall building and more particular it's Co2 values.
