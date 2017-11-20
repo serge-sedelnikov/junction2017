@@ -10,7 +10,8 @@ Hi! This is the explanation of what devices we have at the Junction. The protoco
     - [MQTT Broker and Test Application](#mqtt-broker-and-test-application)
     - [Locations, Tags and Topics](#locations-tags-and-topics)
     - [JavaScript example over WebSockets](#javascript-example-over-websocket)
-
+2. [NFC Tags](#nfc-tags)
+3. [Air Quality](#air-quality)
 
 # Industrial RFID Reader (Impinj)
 
@@ -33,10 +34,10 @@ The industrial readers are usually used to track the item over place and time. I
 
 In our Junction case we defined four test locations:
 
-1. Junction.2017.1
-1. Junction.2017.2
-1. Junction.2017.3
-1. Junction.2017.4
+1. **Junction.2017.1**
+1. **Junction.2017.2**
+1. **Junction.2017.3**
+1. **Junction.2017.4**
 
 Every time UHF tag is changing the location, the MQTT message is broadcasted under the following topics:
 
@@ -90,14 +91,66 @@ Receive message and do stuff
 client.on('message', (topic, message) => {
     // NOTE! message comes as an array of bytes.
     console.log(topic, message.toString());
-    
+
     // do stuff here...
 });
 ```
+# NFC Tags
 
+Probably you all know what are NFC tags. Near-field communication tags. They can be encoded by several fields and then, when scanned by phone, start an application, open URL, show contact details, etc.
 
+In junction we have pre-encoded NFC tags, every time any of them is scanned by mobile phone, the MQTT event is fired.
 
+The topic to listen to is
 
+1. `nfc/scan` - fires every time NFC tag is scanned.
 
+> Note, you will probably see the message after scanning: _The tag is not found_ on your phone screen - don't worry, the logic here is the proxy, after scanning, emits the message and also redirects user to the predefined web-site.
 
+> In our case we don't have predefined web site for Junction hacks. Ask me if you want to redirect tags to certain URL.
 
+The payload of the MQTT event is the tag EPC code.
+
+# Air Quality
+
+Together with connected boxes Stora Enso provides air quality sensors to monitor air in the warehouse. The sensors can report the following values:
+
+1. Temperature
+2. Relative air humidity
+3. Level of CO2
+4. Luminosity
+5. Movement detected
+6. ~~VOC~~ (not available at the sensors we can provide at the moment)
+
+The sensors are fully autonomous and always report to the cloud, no need to connect them to power source or to the network.
+
+>Sensors are always online and are using **LoRa** network to broadcast measured values.
+
+## API to Fetch the Air Quality
+
+The sensors report every 15 minutes. Stora Enso provides **GraphQL API** to fetch the data.
+
+We provide you a sendbox where you can compose and test API queries
+
+```
+https://woodcityapiqa.azurewebsites.net/graphiql/index.html
+``` 
+Navigate there, build up query, test result data and use it in your application and API.
+
+See the example react application in `airquality` folder. To run it execute
+
+```
+npm start
+```
+
+With the API you can query all or any of the above air wuality metrics:
+
+1. Per country (`"FIN"`);
+2. Per building (`"Junction2017"`);
+3. Per building floor - assuming we have one floor only, but we can change it if we appear to have multiple floors (`1`);
+4. Per room on the floor (`"<room name>"` TBD);
+5. Per each sensor (`"<serial number>"`).
+
+Also for building you can query sensors, floors and rooms.
+
+> Use `Ctrl+Space` in the sandbox to get available composition values and `Play` button to test the query.

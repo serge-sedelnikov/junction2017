@@ -37,8 +37,9 @@ class App extends Component {
         connecting: false,
         connected: true
       });
-      client.subscribe('location/+/tagEntered');
-      client.subscribe('location/+/tagLeft');
+      // client.subscribe('location/+/tagEntered');
+      // client.subscribe('location/+/tagLeft');
+      client.subscribe('nfc/scan');
     })
      
     client.on('message', (topic, message) => {
