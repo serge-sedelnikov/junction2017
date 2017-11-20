@@ -28,7 +28,7 @@ class App extends Component {
       connecting: true
     });
     let client  = mqtt.connect({
-      host: 'localhost',
+      host: 'mqtt.intelligentpackaging.online',
       port: 9001
     });
     client.on('connect', () => {
@@ -39,7 +39,6 @@ class App extends Component {
       });
       client.subscribe('location/+/tagEntered');
       client.subscribe('location/+/tagLeft');
-	  client.subscribe('smartshelf/nur/inventory');
     })
      
     client.on('message', (topic, message) => {
