@@ -188,3 +188,63 @@ Notice `-d` data field is JSON object having one key `"query"` and the value is 
 ```
 
 Once the query is executed, the result JSON will contain in this case air quality for overall building and more particular it's Co2 values.
+
+Here is sample JavaScript code:
+
+Define URL and Query to execute
+
+```js
+let url = 'https://woodcityapiqa.azurewebsites.net/api/v1/GraphQL';
+let query = {
+    query: "{ building(id:\"Junction2017\") { airquality { co2, timestamp }}}"
+}
+```
+
+Make a `fetch` request and gather result as JSON.
+
+```js
+fetch(url, {
+    method: 'POST',
+    headers: {
+    'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(query)
+})
+.then(res => res.json())
+.then(data => this.setState({
+    data
+}));
+```
+
+Make sure you understand that you can compose any query to get any data you are interested in. For instance I noticed that duting the day it is too hot at one of my meeting rooms. I want to compare it to overall building level of air quality and to the country average values in order to find out is it only in this particular room I have ventilation problems, or in all building or maybe all Finland is too humid and hot. In order to do this I need to post following request:
+
+```
+{
+  building(id: "Junction2017"){
+    airquality {
+      temperature,
+      humidity,
+      co2
+      timestamp
+    },
+    floor(number: 1){
+      room(name: "main meeting room"){
+        airquality {
+          temperature,
+          humidity,
+          co2
+        }
+      }
+    }
+  },
+  country(isoA3Code: "FIN"){
+    airquality(function: "mean") {
+      temperature,
+      humidity,
+      co2
+    }
+  }
+}
+```
+
+The query will return the data containing building overall values, values for one meeting room `"main meeting room"` and country level averages.
