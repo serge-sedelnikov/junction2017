@@ -14,6 +14,7 @@ Hi! This is the explanation of what devices we have at the Junction. The protoco
 3. [Air Quality](#air-quality)
     - [API Sandbox](#api-sandbox)
     - [API Query](#api-query)
+4. [Raw Reader Data](#raw-reader-data)
 
 # Industrial RFID Reader (Impinj)
 
@@ -250,3 +251,48 @@ Make sure you understand that you can compose any query to get any data you are 
 ```
 
 The query will return the data containing building overall values, values for one meeting room `"main meeting room"` and country level averages.
+
+# Raw Reader Data
+
+Each reader emits plenty of raw data called Inventory Round. Ir reports every second to the server what is detected next to each antenna.
+
+You can perform own calculations on the presence or absence of tags. This is happening before the data goes to MQTT broker. When data comes to the server it filters alot of it and them emits MQTT - is something entered or left the antenna.
+
+As a developer you also have a chanse to receive raw data each second on what is next to each antenna right now. 
+
+You can use socket.io client.
+
+> See the  `raw_reader_data` project sample;
+
+To run the sampel use
+
+```
+npm install
+node index.js
+```
+
+The edge processing server is located at `http://balabanovo.westeurope.cloudapp.azure.com`, the reader mac address to use is `00:16:25:12:16:4F` - this is the reader we have at Junction2017.
+
+The message contains the reader MAC address and the raw readings it see now at each antenna:
+
+```json
+{
+    "macAddress": "00:16:25:12:16:4F", // MAC address of the reader, NOTE! we have several readers reporting to this socket server, use only one which is mentioned.
+    "orderedRecords": [
+       {
+            "antenna_port": 0,
+            "epc": "********",
+            "first_seen_timestamp": 1511601782006,
+            "peak_rssi": 44,
+            "tid": "********",
+            "scan_count": 1
+       }
+    ]
+}
+``` 
+- `antenna_port` - the number of the antenna the tag is detected at (0,1,2 or 3) NOTE, it can be detected by several antennas, use `peak_rssi` or `scan_count` to detect to which antenna the tag is closer;
+- `epc` - the unique ID of the tag;
+- `first_seen_timestamp` - timestamp of the reading event (ticks);
+- `peak_rssi` - the max reflection power - 50 is the best. the more it goes to 0 - the worse the signal is.
+- `tid` - the unique tag ID (in our case === to `epc`)
+- `scan_count` - how many times tag was scanned for last second. The closer the tag to the antenna, the more scannings it gets. Reader scans them ever 20ms.
